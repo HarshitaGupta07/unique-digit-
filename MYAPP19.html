@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Code Generator</title>
+    <!-- 
+        All CSS is placed here within the <style> tags.
+        It uses the blue, light red/pink, and pale yellow color scheme requested.
+    -->
+    <style>
+        /* Define the Custom Color Palette */
+        :root {
+            --color-pale-yellow: #fcf8e3; /* Light, creamy background */
+            --color-light-red-pink: #ffebf0; /* Light red/pink for generated display */
+            --color-blue: #1e90ff; /* Primary Blue (Dodger Blue) */
+            --color-dark-blue: #0077cc;
+            --color-text-dark: #333;
+            --color-text-light: #666;
+            --color-display-initial: #fff0e0; /* Pale yellow/cream for initial display */
+        }
+
+        /* Basic Setup and Styling */
+        body {
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--color-pale-yellow); 
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        /* Container Card - Mobile First and Responsive */
+        .container {
+            width: 95%; /* Ensures good padding on small screens */
+            max-width: 450px; /* Max width for desktop/tablet */
+            padding: 30px 25px;
+            background-color: #ffffff;
+            border-radius: 20px;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15); 
+            text-align: center;
+        }
+
+        /* Text Styles */
+        h1 {
+            color: var(--color-text-dark);
+            font-size: 2.2em;
+            margin-bottom: 0px;
+            font-weight: 800;
+        }
+
+        .subtitle {
+            color: var(--color-text-light);
+            margin-bottom: 35px;
+            font-size: 0.95em;
+        }
+
+        /* Number Display Area - The box containing the generated code */
+        #number-display-wrapper {
+            background-color: var(--color-display-initial); 
+            padding: 25px 20px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            height: 90px; 
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.5s ease; 
+            box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.05);
+            overflow: hidden; 
+        }
+        
+        /* Class applied when a code is generated (changes background color) */
+        .code-generated {
+            background-color: var(--color-light-red-pink) !important;
+        }
+
+        /* Styling for the numbers when visible */
+        #number-display {
+            font-size: 4em; 
+            font-weight: 900;
+            color: var(--color-blue); 
+            opacity: 0; 
+            transition: opacity 0.3s ease-in-out;
+            /* FIX: Prevents numbers from wrapping to a second line on small screens */
+            white-space: nowrap; 
+        }
+        
+        /* Styling for the initial placeholder text */
+        .placeholder-text {
+            font-size: 1.5em !important;
+            letter-spacing: 0.1em !important;
+            color: var(--color-text-light) !important;
+            font-weight: 500 !important;
+            opacity: 1 !important; 
+            white-space: normal !important; 
+        }
+
+        /* Button Styling */
+        #generate-btn {
+            width: 100%;
+            padding: 18px;
+            font-size: 1.2em;
+            font-weight: 700;
+            color: #ffffff;
+            background-color: var(--color-blue); 
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            box-shadow: 0 6px 20px rgba(30, 144, 255, 0.4);
+            transition: background-color 0.2s, transform 0.1s, box-shadow 0.2s;
+        }
+
+        #generate-btn:hover {
+            background-color: var(--color-dark-blue); 
+            box-shadow: 0 8px 25px rgba(30, 144, 255, 0.6);
+        }
+
+    
+        #generate-btn:active {
+            transform: translateY(2px);
+            box-shadow: 0 4px 15px rgba(30, 144, 255, 0.4);
+        }
+        
+        /* Responsive adjustment for small phones */
+        @media (max-width: 380px) {
+            #number-display {
+                font-size: 3.5em; 
+                letter-spacing: 0.4em;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+
+        <h1>Code Generator</h1>
+        <p class="subtitle">Get your unique 4-digit code.</p>
+
+        <!-- Display Area -->
+        <div id="number-display-wrapper">
+            <!-- Initial content is placeholder text -->
+            <span id="number-display" class="placeholder-text">
+                Click to Generate
+            </span>
+        </div>
+
+        <!-- Generate Button -->
+        <button id="generate-btn">
+            Generate New Code
+        </button>
+
+    </div>
+
+    <!-- 
+        All JavaScript logic is here within the <script> tags.
+    -->
+    <script>
+        // Get references to the HTML elements we need to interact with
+        const numberDisplay = document.getElementById('number-display');
+        const displayWrapper = document.getElementById('number-display-wrapper');
+        const generateBtn = document.getElementById('generate-btn');
+
+        /**
+         * Core logic: Generates a 4-digit number where all digits (0-9) are guaranteed to be unique.
+         * Uses the Fisher-Yates (Knuth) shuffle algorithm for efficient randomness.
+         * @returns {string} The 4-digit unique number string.
+         */
+        function generateUnique4DigitNumber() {
+            // Create an array containing all digits
+            const digits = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
+
+            // Shuffle the array
+            for (let i = digits.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                // Swap digits[i] and digits[j]
+                [digits[i], digits[j]] = [digits[j], digits[i]];
+            }
+
+            // Take the first 4 elements, which are now unique and randomized
+            const uniqueNumber = digits.slice(0, 4).join('');
+            return uniqueNumber;
+        }
+
+        /**
+         * Handles the button click, generating the number and handling the UI effects.
+         */
+        function handleGenerate() {
+            // Remove the placeholder class, signaling that we are showing a real code
+            numberDisplay.classList.remove('placeholder-text');
+            
+            // 1. Start the fade out effect
+            numberDisplay.style.opacity = '0';
+            
+            // 2. Wait 300ms (to match the CSS transition) before generating/showing the new code
+            setTimeout(() => {
+                const newCode = generateUnique4DigitNumber();
+                
+                // Change the wrapper background color for the visual feedback
+                displayWrapper.classList.add('code-generated');
+
+                // Update the text content. We add spaces to improve readability of the large font.
+                numberDisplay.textContent = newCode.split('').join(' '); 
+
+                // 3. Fade in the new number
+                numberDisplay.style.opacity = '1';
+
+                console.log('Generated Code:', newCode);
+            }, 300); 
+        }
+
+        // --- Event Listeners ---
+
+        // Attach the generation function to the button click event
+        generateBtn.addEventListener('click', handleGenerate);
+
+        console.log("Code Generator App successfully initialized.");
+    </script>
+</body>
+</html>
